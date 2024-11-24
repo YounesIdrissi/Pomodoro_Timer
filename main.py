@@ -1,46 +1,40 @@
+import tkinter as tk
+from functools import partial
 import time
 
-#start = True whether start or stop is true (start/stop button)
-start = str(input("print t for true: "))
-if start == "t":
-    start = True
-else:
-    start = False
-work = True
+ticking = False #by default the clock is paused
 
-def clock(s):#clock/ticking timer function
-    while s >= 0:
-        if not start:#if start is false, immediately stop clock, but don't exit clock
+last_time = {'Last': 1500}#update last time to this dictionary and call it within start_stop function
+
+def start_stop(s, t):#arguments are time in seconds and ticking
+    if t == False:#we switch back and forth between on or off (when start_stop is invoked)
+        t = True
+    else:
+        t = False
+
+    def clock(s):
+        while s >= 0:
+            seconds = s % 60
+            minutes = int(s / 60) % 60
+            hours = int((s / 60) / 60)
+            print(f"{hours:02}:{minutes:02}:{seconds:02}")
+            last_time.update(Last=s)
+            s -= 1
             time.sleep(1)
-            #sleep until start
-        seconds = int(s % 60)
-        minutes = int(s / 60) % 60
-        hours = int((s / 60) / 60) 
-        print(f"{hours:02}:{minutes:02}:{seconds:02}")
-        s -= 1
-        time.sleep(1)
+    if t == True:
+        return clock(s)
+    else:
+        return #return the last value updated to last_time and display it
 
-def start_stop():
-    pass#lets define a start_stop function which when button start/stop is pressed, retrieves the current time from clock function
-    #and saves it until button is clicked again to resume, that is when the saved time (s) can be passed to a new call of the function clock
-    #
+root = tk.Tk()
+root.geometry("700x700")
+root.title("Pomodoro")
 
-def reset():
-    pass
+btn = tk.Button(root, text="Start/Stop", font=("Ariel", 20))
+btn.config(command=partial(start_stop, last_time['Last'], ticking))
+btn.pack()
 
-def work_rest(w):
-    while start:
-        if w: #pomodoro work timer
-            min = 25
-            sec = min * 60
-            clock(sec)
-            start_stop()
-            w = False
-        else: #pomodoro rest timer
-            min = 5
-            sec = min * 60
-            clock(sec)
-            w = True
+root.mainloop()
 
-work_rest(work)
+
 
