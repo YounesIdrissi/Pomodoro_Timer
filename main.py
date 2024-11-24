@@ -13,7 +13,7 @@ def start_stop(s, t):#arguments are time in seconds and ticking
         t = False
 
     def clock(s):
-        while s >= 0:
+        while s >= 0 and t == True:
             seconds = s % 60
             minutes = int(s / 60) % 60
             hours = int((s / 60) / 60)
