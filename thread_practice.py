@@ -1,29 +1,42 @@
+import tkinter as tk
 import threading
 import time
 
-#must learn map, pool, parallelism and multithreading to handle communication between threads 
-#(handle communication between different functions/loops)
-#to allow user input to immediately update a loop, mid-loop, without waiting for the loop to end
+#the MAIN THREAD is the default/initial thread of execution in any given program
+#OBJECTS & CLASSES - this is the avoidance of global declaration, with no need for mutable containers (lists, dicts, etc.)
 
-#lets start with elementary examples and build our way up (lets try some map functions)
+class Pomodoro:
+    def __init__(self, remain, state):
+        self.remain = remain
+        self.state = state
+    def clock(self):
+        while self.remain >= 0:#infinite loop is required here, prevents thread from ending once ss = False
+            while self.state == True:
+                seconds = self.remain % 60
+                minutes = int(self.remain / 60) % 60
+                hours = int((self.remain / 60) / 60)
+                print(f"{hours:02}:{minutes:02}:{seconds:02}")
+                self.remain -= 1
+                time.sleep(1)#place time.sleep() at the end to immidiately display initial time before 1 second wait
+    def start_stop(self):
+        if self.state == True:
+            self.state = False
+        else:
+            self.state = True
 
-# stuff = ['123', '234', '345', '456', '567']
+pomodoro = Pomodoro(1500, True)
 
-# result = list(map(lambda s: s[0], stuff))#lambda is basically a single line function
-# print(result)
+if __name__ == '__main__':
+    clock_thread = threading.Thread(target=pomodoro.clock)#this is a CHILD/WORKER THREAD, which can execute its target function 
+                                                #simultaneously while we do our other processes
+    clock_thread.start()
 
-last_time = {'Last': 1500}
+    root = tk.Tk()
+    root.geometry("700x700")
+    root.title("Pomodoro")
 
-def clock(s):
-    while s >= 0:
-        seconds = s % 60
-        minutes = int(s / 60) % 60
-        hours = int((s / 60) / 60)
-        print(f"{hours:02}:{minutes:02}:{seconds:02}")
-        last_time.update(Last=s)
-        s -= 1
-        time.sleep(1)
+    btn = tk.Button(root, text="Start/Stop", font=("Ariel", 20))
+    btn.config(command=pomodoro.start_stop)
+    btn.pack()
 
-thread = threading.Thread(target=clock, args=(last_time['Last'],))#this is a thread, which can execute its target function simultaneously whilst other processes are going
-
-thread.start()
+    root.mainloop()
