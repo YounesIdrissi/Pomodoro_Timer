@@ -1,22 +1,16 @@
-import time
+#functions can mutate objects given as an arguments, to a global level
+'''
+I had some slight confusion, but just cleared it up, So the object container must be passed as a functional argument 
+to mutate the contained global objects within the container (dict or list for example). 
+You can't pass the contained objects themselves as arguments and expect to globally mutate them.
+'''
+d = {'Num': 10}
 
-last_time = {'Last': 1500}
+def mutate(container):
+    container['Num'] -= 1
+    return container
 
-def clock(s):
-    tic = input("Enter y to begin/continue: ")#this loop prompts for input every time, we don't want this, we only want it to check for input, not prompt it every time
-    #in otherwords, continue unless there is input (input which tells function to pause/resume)
-    while s >= 0 and tic == 'y':
-        seconds = s % 60
-        minutes = int(s / 60) % 60
-        hours = int((s / 60) / 60)
-        print(f"{hours:02}:{minutes:02}:{seconds:02}")
-        last_time.update(Last=s)
-        s -= 1
-        time.sleep(1)
-        tic = input("Enter y to continue: ")
+mutate(d)
 
-clock(last_time['Last'])
-
-
-
-
+print(d['Num']) #passing the container dict as an argument
+#functions can mutate objects given as an arguments, to a global level (given you pass the containers)
