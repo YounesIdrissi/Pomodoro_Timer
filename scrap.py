@@ -1,17 +1,21 @@
 #Tkinter clock display
 import tkinter as tk
 import threading
+from functools import partial
 import time
 
 #the MAIN THREAD is the default/initial thread of execution in any given program
 #OBJECTS & CLASSES - this is the avoidance of global declaration, with no need for mutable containers (lists, dicts, etc.)
 
+saves = []
+
 class Pomodoro:
-    def __init__(self, work, rest, state, wr_state):#work/rest state, work=true, rest=false
+    def __init__(self, work, rest, state, wr_state, total):#work/rest state, work=true, rest=false
         self.work = work
         self.rest = rest
         self.state = state
         self.wr_state = wr_state#brute forced this, created a new object which determines work/rest state
+        self.total = total#total elasped time, includes work and rest times; total session time
         self.remain = work #remaining time cycles between work/rest times, starts with work time as default
 
     def clock(self):
@@ -21,7 +25,8 @@ class Pomodoro:
         text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 40))
         text.grid(row=0, column=0)
         while True:#infinite loop is required here, prevents thread from ending once inner loop is False
-            while self.state == True and self.remain >= 1:#self.remain >= 1 and not 0, because it decrements an extra 1
+            while self.state and self.remain >= 1:#self.remain >= 1 and not 0, because it decrements an extra 1
+                self.total += 1#increment total session time
                 self.remain -= 1
                 seconds = self.remain % 60
                 minutes = int(self.remain / 60) % 60
@@ -32,7 +37,7 @@ class Pomodoro:
                 pomodoro.switch()
 
     def start_stop(self):
-        if self.state == True:
+        if self.state:
             self.state = False
         else:
             self.state = True
@@ -60,9 +65,30 @@ class Pomodoro:
             self.wr_state = True
 
     def save(self):
-        pass
+        if self.state:
+            self.state = False
+        seconds = self.total % 60
+        minutes = int(self.total / 60) % 60
+        hours = int((self.total / 60) / 60)
+        text = tk.Label(timer, text=f"Total session time: {hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 20))
+        text.grid(row=4, column=0)
+        pomodoro.save_prompt()
 
-pomodoro = Pomodoro(10, 5, False, True)#work time, rest time, start/stop state, work/rest state (work is true by default)
+    def save_prompt(self):
+        entry = tk.Entry(save_menu, text="", font=("Ariel", 15))
+        entry.config()
+        entry.grid(row=0, column=0)
+        save = tk.Button(save_menu, text="Save", font=("Ariel", 10))
+        save.config(command=partial(pomodoro.appender, entry))
+        save.grid(row=0, column=1)
+    
+    def appender(self, entry):
+        saves.append(entry.get())
+        print(saves)#for testing purposes
+
+
+#work time, rest time, start/stop state, work/rest state (work is true by default), total elapsed time (0 by default)
+pomodoro = Pomodoro(10, 5, False, True, 0)
 
 if __name__ == '__main__':
     root = tk.Tk()
@@ -71,6 +97,15 @@ if __name__ == '__main__':
 
     timer = tk.Frame(root)
     timer.columnconfigure(0, weight=1)
+
+    session = tk.Frame(root)
+    session.columnconfigure(0, weight=1)#general info
+    session.columnconfigure(1, weight=1)#delete session
+
+    save_menu = tk.Frame(root)
+    save_menu.columnconfigure(0, weight=1)
+    save_menu.columnconfigure(1, weight=1)
+
     
     clock_thread = threading.Thread(target=pomodoro.clock)#this is a CHILD/WORKER THREAD, which can execute its target function 
                                                 #simultaneously while we do our other processes
@@ -83,6 +118,14 @@ if __name__ == '__main__':
     rbtn = tk.Button(timer, text="Reset", font=("Ariel", 20))
     rbtn.config(command=pomodoro.reset)
     rbtn.grid(row=2, column=0)
+
+    sbtn = tk.Button(timer, text="Save", font=("Ariel", 20))
+    sbtn.config(command=pomodoro.save)
+    sbtn.grid(row=3, column=0)
+
+    save_menu.pack()
+
+    session.pack()
 
     timer.pack()
 
