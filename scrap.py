@@ -7,7 +7,7 @@ import time
 #the MAIN THREAD is the default/initial thread of execution in any given program
 #OBJECTS & CLASSES - this is the avoidance of global declaration, with no need for mutable containers (lists, dicts, etc.)
 
-saves = []
+saves = {}#dictionary, value pairs: ("elapsed_time": "text_entry")
 
 class Pomodoro:
     def __init__(self, work, rest, state, wr_state, total):#work/rest state, work=true, rest=false
@@ -22,7 +22,7 @@ class Pomodoro:
         seconds = self.remain % 60
         minutes = int(self.remain / 60) % 60
         hours = int((self.remain / 60) / 60)
-        text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 40))
+        text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 60))
         text.grid(row=0, column=0)
         while True:#infinite loop is required here, prevents thread from ending once inner loop is False
             while self.state and self.remain >= 1:#self.remain >= 1 and not 0, because it decrements an extra 1
@@ -31,7 +31,7 @@ class Pomodoro:
                 seconds = self.remain % 60
                 minutes = int(self.remain / 60) % 60
                 hours = int((self.remain / 60) / 60)
-                text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 40))
+                text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 60))
                 text.grid(row=0, column=0)
                 time.sleep(1)#place time.sleep() at the end to immidiately display initial time before 1 second wait
                 pomodoro.switch()
@@ -51,7 +51,7 @@ class Pomodoro:
         seconds = self.remain % 60
         minutes = int(self.remain / 60) % 60
         hours = int((self.remain / 60) / 60)
-        text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 40))
+        text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 60))
         text.grid(row=0, column=0)
 
     def switch(self):#switches from work timer to rest timer
@@ -64,27 +64,42 @@ class Pomodoro:
             self.remain = self.work#display 'WORK' text on the top
             self.wr_state = True
 
-    def save(self):
+    def save(self):#initial save button; pauses timer and opens save prompt
         if self.state:
             self.state = False
-        seconds = self.total % 60
-        minutes = int(self.total / 60) % 60
-        hours = int((self.total / 60) / 60)
-        text = tk.Label(timer, text=f"Total session time: {hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 20))
-        text.grid(row=4, column=0)
         pomodoro.save_prompt()
+
+    def save_iter(self):
+        for n in saves:
+            sesh = tk.Label(session, text=f"{n[1]} -- Elapsed time: {n[0]}", font=("Ariel", 15))
+            sesh.grid(row=list(saves).index(n), column=0)
+            dlt = tk.Button(session, text="Delete", font=("Ariel", 10))
+            dlt.config(command=pomodoro.delete)
+            dlt.grid(row=list(saves).index(n), column=1)
+
 
     def save_prompt(self):
         entry = tk.Entry(save_menu, text="", font=("Ariel", 15))
-        entry.config()
         entry.grid(row=0, column=0)
         save = tk.Button(save_menu, text="Save", font=("Ariel", 10))
         save.config(command=partial(pomodoro.appender, entry))
         save.grid(row=0, column=1)
+        pomodoro.save_iter()
+        
     
     def appender(self, entry):
-        saves.append(entry.get())
-        print(saves)#for testing purposes
+        seconds = self.total % 60
+        minutes = int(self.total / 60) % 60
+        hours = int((self.total / 60) / 60)
+        saves[f"{hours:02}:{minutes:02}:{seconds:02}"] = entry.get()
+        for widget in save_menu.winfo_children():
+            widget.destroy()
+        self.total = 0
+        print(saves)
+    
+    def delete(self):
+        pass
+
 
 
 #work time, rest time, start/stop state, work/rest state (work is true by default), total elapsed time (0 by default)
