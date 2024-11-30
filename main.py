@@ -93,11 +93,14 @@ class Pomodoro:
             sesh = tk.Label(session, text=f"{key} -- Elapsed time: {value}", font=("Ariel", 15))
             sesh.grid(row=index, column=0)
             dlt = tk.Button(session, text="Delete", font=("Ariel", 10))
-            dlt.config(command=pomodoro.delete)
+            dlt.config(command=partial(pomodoro.delete, key))
             dlt.grid(row=index, column=1)
     
-    def delete(self):
-        pass
+    def delete(self, key):
+        saved.pop(key)
+        for widget in session.winfo_children():
+            widget.destroy()
+        pomodoro.save_iter()
 
 
 
