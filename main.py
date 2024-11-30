@@ -23,6 +23,7 @@ class Pomodoro:
         hours = int((self.remain / 60) / 60)
         text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 60))
         text.grid(row=0, column=0)
+        pomodoro.display_wr_state()
         while True:#infinite loop is required here, prevents thread from ending once inner loop is False
             while self.state and self.remain >= 1:#self.remain >= 1 and not 0, because it decrements an extra 1
                 self.total += 1#increment total session time
@@ -32,8 +33,8 @@ class Pomodoro:
                 hours = int((self.remain / 60) / 60)
                 text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 60))
                 text.grid(row=0, column=0)
-                time.sleep(1)#place time.sleep() at the end to immidiately display initial time before 1 second wait
                 pomodoro.switch()
+                time.sleep(1)#place time.sleep() at the end to immidiately display initial time before 1 second wait
 
     def start_stop(self):
         if self.state:
@@ -53,15 +54,35 @@ class Pomodoro:
         text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 60))
         text.grid(row=0, column=0)
 
+    def display_wr_state(self):
+        #using a while loop here would create infinite loop
+        if self.wr_state:
+            #display 'WORK' text on the top
+            text = tk.Label(timer, text="WORK", font=("Ariel", 20))
+            text.grid(row=5, column=0)
+        else:
+            #display 'REST' text on the top
+            text = tk.Label(timer, text="REST", font=("Ariel", 20))
+            text.grid(row=5, column=0)
+
     def switch(self):#switches from work timer to rest timer
-        if self.remain >= 1:
+        if self.remain >= 1:#barrier
             return
         if self.wr_state:
-            self.remain = self.rest#display 'REST' text on the top
+            self.remain = self.rest
+            #display 'REST' text on the top
+            text = tk.Label(timer, text="REST", font=("Ariel", 20))
+            text.grid(row=5, column=0)
             self.wr_state = False
         else:
-            self.remain = self.work#display 'WORK' text on the top
+            self.remain = self.work
+            #display 'WORK' text on the top
+            text = tk.Label(timer, text="WORK", font=("Ariel", 20))
+            text.grid(row=5, column=0)
             self.wr_state = True
+
+    def instant_switch(self):
+        pass
 
     def save(self):#initial save button; pauses timer and opens save prompt
         if self.state:
@@ -89,6 +110,9 @@ class Pomodoro:
         pomodoro.save_iter()
 
     def save_iter(self):
+        if not saved:#ensures iteration of a blank space when there are no more dict elements
+            space = tk.Label(session)
+            space.grid(row=0)
         for index, (key, value) in enumerate(saved.items()):
             sesh = tk.Label(session, text=f"{key} -- Elapsed time: {value}", font=("Ariel", 15))
             sesh.grid(row=index, column=0)
@@ -97,7 +121,7 @@ class Pomodoro:
             dlt.grid(row=index, column=1)
     
     def delete(self, key):
-        saved.pop(key)
+        saved.pop(key)#poping a key pops the entire dict element; index, (key, value) pair is removed
         for widget in session.winfo_children():
             widget.destroy()
         pomodoro.save_iter()
@@ -140,6 +164,10 @@ if __name__ == '__main__':
     sbtn = tk.Button(timer, text="Save", font=("Ariel", 20))
     sbtn.config(command=pomodoro.save)
     sbtn.grid(row=3, column=0)
+
+    switchbtn = tk.Button(timer, text="Switch", font=("Ariel", 20))
+    switchbtn.config(command=pomodoro.instant_switch)
+    switchbtn.grid(row=4, column=0)
 
     save_menu.pack()
 
