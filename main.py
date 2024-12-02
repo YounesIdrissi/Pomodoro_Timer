@@ -15,7 +15,7 @@ class Pomodoro:
         self.state = state
         self.wr_state = wr_state#brute forced this, created a new object which determines work/rest state
         self.total = total#total elasped time, includes work and rest times; total session time
-        self.remain = work #remaining time cycles between work/rest times, starts with work time as default
+        self.remain = work #time remaining for work/rest cylce
 
     def clock(self):
         seconds = self.remain % 60
@@ -33,8 +33,9 @@ class Pomodoro:
                 hours = int((self.remain / 60) / 60)
                 text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 60))
                 text.grid(row=0, column=0)
-                pomodoro.switch()
+                pomodoro.auto_switch()
                 time.sleep(1)#place time.sleep() at the end to immidiately display initial time before 1 second wait
+                #time.sleep slows down & gets in the way of immediate and precise actions, how can we fix this?
 
     def start_stop(self):
         if self.state:
@@ -54,35 +55,73 @@ class Pomodoro:
         text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 60))
         text.grid(row=0, column=0)
 
-    def display_wr_state(self):
+    def display_wr_state(self):#we could use this method more often to reduce redundancy
         #using a while loop here would create infinite loop
+        for widget in wr_display.winfo_children():
+            widget.destroy()
         if self.wr_state:
             #display 'WORK' text on the top
-            text = tk.Label(timer, text="WORK", font=("Ariel", 20))
-            text.grid(row=5, column=0)
+            text = tk.Label(wr_display, text="WORK", font=("Ariel", 20))
+            text.grid(row=0, column=0)
         else:
             #display 'REST' text on the top
-            text = tk.Label(timer, text="REST", font=("Ariel", 20))
-            text.grid(row=5, column=0)
+            text = tk.Label(wr_display, text="REST", font=("Ariel", 20))
+            text.grid(row=0, column=0)
+        #immediately display time so GUI looks better
+        seconds = self.remain % 60
+        minutes = int(self.remain / 60) % 60
+        hours = int((self.remain / 60) / 60)
+        text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 60))
+        text.grid(row=0, column=0)
 
-    def switch(self):#switches from work timer to rest timer
+    def auto_switch(self):#switches from work timer to rest timer
         if self.remain >= 1:#barrier
             return
+        #alarm/notification
+        for widget in wr_display.winfo_children():
+            widget.destroy()
         if self.wr_state:
-            self.remain = self.rest
+            self.remain = self.rest#setting remaining time equal to rest time
             #display 'REST' text on the top
-            text = tk.Label(timer, text="REST", font=("Ariel", 20))
-            text.grid(row=5, column=0)
+            text = tk.Label(wr_display, text="REST", font=("Ariel", 20))
+            text.grid(row=0, column=0)
             self.wr_state = False
         else:
-            self.remain = self.work
+            self.remain = self.work#setting remaining time equal to work time
             #display 'WORK' text on the top
-            text = tk.Label(timer, text="WORK", font=("Ariel", 20))
-            text.grid(row=5, column=0)
+            text = tk.Label(wr_display, text="WORK", font=("Ariel", 20))
+            text.grid(row=0, column=0)
             self.wr_state = True
+        #immediately display time so GUI looks better
+        seconds = self.remain % 60
+        minutes = int(self.remain / 60) % 60
+        hours = int((self.remain / 60) / 60)
+        text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 60))
+        text.grid(row=0, column=0)
 
     def instant_switch(self):
-        pass
+        #maybe alarm or notification, depends on user testing
+        for widget in wr_display.winfo_children():
+            widget.destroy()
+        if self.wr_state:
+            self.remain = self.rest#setting remaining time equal to rest time
+            #display 'REST' text on the top
+            text = tk.Label(wr_display, text="REST", font=("Ariel", 20))
+            text.grid(row=0, column=0)
+            self.wr_state = False
+        else:
+            self.remain = self.work#setting remaining time equal to work time
+            #display 'WORK' text on the top
+            text = tk.Label(wr_display, text="WORK", font=("Ariel", 20))
+            text.grid(row=0, column=0)
+            self.wr_state = True
+        #immediately display time so GUI looks better
+        seconds = self.remain % 60
+        minutes = int(self.remain / 60) % 60
+        hours = int((self.remain / 60) / 60)
+        text = tk.Label(timer, text=f"{hours:02}:{minutes:02}:{seconds:02}", font=("Ariel", 60))
+        text.grid(row=0, column=0)
+
 
     def save(self):#initial save button; pauses timer and opens save prompt
         if self.state:
@@ -148,6 +187,9 @@ if __name__ == '__main__':
     save_menu.columnconfigure(1, weight=1)
     save_menu.columnconfigure(2, weight=1)
 
+    wr_display = tk.Frame(root)
+    wr_display.columnconfigure(0, weight=1)
+
     
     clock_thread = threading.Thread(target=pomodoro.clock)#this is a CHILD/WORKER THREAD, which can execute its target function 
                                                 #simultaneously while we do our other processes
@@ -168,6 +210,8 @@ if __name__ == '__main__':
     switchbtn = tk.Button(timer, text="Switch", font=("Ariel", 20))
     switchbtn.config(command=pomodoro.instant_switch)
     switchbtn.grid(row=4, column=0)
+
+    wr_display.pack()
 
     save_menu.pack()
 
