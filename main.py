@@ -165,9 +165,59 @@ class Pomodoro:
             widget.destroy()
         pomodoro.save_iter()
 
+    def settings_gate(self):#pop up window for all other options
+        top = tk.Toplevel(root)
+        top.geometry("400x300")
+        top.title("Settings")
+
+        menu = tk.Frame(top)
+        menu.columnconfigure(0, weight=1)#grid menu of settings options
+
+        change_time = tk.Button(menu, text="Change Time", font=("Ariel", 20))
+        change_time.config(command=pomodoro.user_times)
+        change_time.grid(row=0, column=0)
+
+        menu.pack()
+
+    def user_times(self):#under settings, user enters custom work/rest time
+        top = tk.Toplevel(root)#create a child window; pop up window
+        top.geometry("400x400")
+        top.title("Work and Rest Times")
+        custom_times = tk.Frame(top)
+        custom_times.columnconfigure(0, weight=1)#text column
+        custom_times.columnconfigure(1, weight=1)#entry column
+        custom_times.columnconfigure(2, weight=1)#submit button column
+
+        wtext = tk.Label(custom_times, text="Enter custom work time: ", font=("Ariel", 15))
+        wtext.grid(row=0, column=0)
+        wentry = tk.Entry(custom_times, text="", font=("Ariel", 15))
+        wentry.grid(row=0, column=1)
+        wbtn = tk.Button(custom_times, text="Submit", font=("Ariel", 10))
+        wbtn.config(command=pomodoro.change_work)
+        wbtn.grid(row=0, column=2)
+
+        rtext = tk.Label(custom_times, text="Enter custom rest time: ", font=("Ariel", 15))
+        rtext.grid(row=1, column=0)
+        rentry = tk.Entry(custom_times, text="", font=("Ariel", 15))
+        rentry.grid(row=1, column=1)
+        rbtn = tk.Button(custom_times, text="Submit", font=("Ariel", 10))
+        rbtn.config(command=pomodoro.change_rest)
+        rbtn.grid(row=1, column=2)
+
+        custom_times.pack()
+
+    def change_work(self):#updates work time
+        pass
+
+    def change_rest(self):#updates rest time
+        pass
 
 
-#work time, rest time, start/stop state, work/rest state (work is true by default), total elapsed time (0 by default)
+
+
+
+
+#work time, rest time, start/stop state, work/rest state (work is true; first by default), total elapsed time (0 by default)
 pomodoro = Pomodoro(10, 5, False, True, 0)
 
 if __name__ == '__main__':
@@ -190,6 +240,9 @@ if __name__ == '__main__':
     wr_display = tk.Frame(root)
     wr_display.columnconfigure(0, weight=1)
 
+    settings = tk.Frame(root)
+    settings.columnconfigure(0, weight=1)
+
     
     clock_thread = threading.Thread(target=pomodoro.clock)#this is a CHILD/WORKER THREAD, which can execute its target function 
                                                 #simultaneously while we do our other processes
@@ -210,6 +263,12 @@ if __name__ == '__main__':
     switchbtn = tk.Button(timer, text="Switch", font=("Ariel", 20))
     switchbtn.config(command=pomodoro.instant_switch)
     switchbtn.grid(row=4, column=0)
+
+    settingsbtn = tk.Button(timer, text="Settings", font=("Ariel", 20))
+    settingsbtn.config(command=pomodoro.settings_gate)
+    settingsbtn.grid(row=5, column=0)
+
+    settings.pack()
 
     wr_display.pack()
 
