@@ -15,7 +15,7 @@ class Pomodoro:
         self.state = state
         self.wr_state = wr_state#brute forced this, created a new object which determines work/rest state
         self.total = total#total elasped time, includes work and rest times; total session time
-        self.remain = work #time remaining for work/rest cylce
+        self.remain = work #time remaining for work/rest cycle
 
     def clock(self):
         seconds = self.remain % 60
@@ -181,7 +181,7 @@ class Pomodoro:
 
     def user_times(self):#under settings, user enters custom work/rest time
         top = tk.Toplevel(root)#create a child window; pop up window
-        top.geometry("400x400")
+        top.geometry("500x100")
         top.title("Work and Rest Times")
         custom_times = tk.Frame(top)
         custom_times.columnconfigure(0, weight=1)#text column
@@ -193,7 +193,7 @@ class Pomodoro:
         wentry = tk.Entry(custom_times, text="", font=("Ariel", 15))
         wentry.grid(row=0, column=1)
         wbtn = tk.Button(custom_times, text="Submit", font=("Ariel", 10))
-        wbtn.config(command=pomodoro.change_work)
+        wbtn.config(command=partial(pomodoro.change_work, wentry))
         wbtn.grid(row=0, column=2)
 
         rtext = tk.Label(custom_times, text="Enter custom rest time: ", font=("Ariel", 15))
@@ -201,20 +201,18 @@ class Pomodoro:
         rentry = tk.Entry(custom_times, text="", font=("Ariel", 15))
         rentry.grid(row=1, column=1)
         rbtn = tk.Button(custom_times, text="Submit", font=("Ariel", 10))
-        rbtn.config(command=pomodoro.change_rest)
+        rbtn.config(command=partial(pomodoro.change_rest, rentry))
         rbtn.grid(row=1, column=2)
 
         custom_times.pack()
 
-    def change_work(self):#updates work time
-        pass
+    def change_work(self, w):#updates work time
+        self.work = int(w.get())
+        #we should include error handling for wrong user input
 
-    def change_rest(self):#updates rest time
-        pass
-
-
-
-
+    def change_rest(self, r):#updates rest time
+        self.rest = int(r.get())
+        #we should include error handling for wrong user input
 
 
 #work time, rest time, start/stop state, work/rest state (work is true; first by default), total elapsed time (0 by default)
