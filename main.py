@@ -212,14 +212,23 @@ class Pomodoro:
         try:
             self.work = int(w.get())
         except ValueError:
-            print("Invalid input. Enter an integer.")
+            pomodoro.value_error()
 
     def change_rest(self, r):#updates rest time
         #we include error handling for wrong user input
         try:
             self.rest = int(r.get())
         except ValueError:
-            print("Invalid input. Enter an integer.")
+            pomodoro.value_error()
+
+    def value_error(self):#create a pop up error message
+        top = tk.Toplevel(root)
+        top.geometry("350x70")
+        top.title("Value Error")
+
+        error = tk.Label(top, text="Invalid input, please enter an integer.", font=("Ariel", 15))
+        error.pack()
+
 
 
 #work time, rest time, start/stop state, work/rest state (work is true; first by default), total elapsed time (0 by default)
