@@ -173,13 +173,14 @@ class Pomodoro:
         menu = tk.Frame(top)
         menu.columnconfigure(0, weight=1)#grid menu of settings options
 
+        #first button; change time button
         change_time = tk.Button(menu, text="Change Time", font=("Ariel", 20))
-        change_time.config(command=pomodoro.user_times)
+        change_time.config(command=pomodoro.change_times)
         change_time.grid(row=0, column=0)
 
         menu.pack()
 
-    def user_times(self):#under settings, user enters custom work/rest time
+    def change_times(self):#under settings, user enters custom work/rest time
         top = tk.Toplevel(root)#create a child window; pop up window
         top.geometry("500x100")
         top.title("Work and Rest Times")
@@ -207,12 +208,18 @@ class Pomodoro:
         custom_times.pack()
 
     def change_work(self, w):#updates work time
-        self.work = int(w.get())
-        #we should include error handling for wrong user input
+        #we include error handling for wrong user input
+        try:
+            self.work = int(w.get())
+        except ValueError:
+            print("Invalid input. Enter an integer.")
 
     def change_rest(self, r):#updates rest time
-        self.rest = int(r.get())
-        #we should include error handling for wrong user input
+        #we include error handling for wrong user input
+        try:
+            self.rest = int(r.get())
+        except ValueError:
+            print("Invalid input. Enter an integer.")
 
 
 #work time, rest time, start/stop state, work/rest state (work is true; first by default), total elapsed time (0 by default)
