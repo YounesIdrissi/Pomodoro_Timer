@@ -129,22 +129,33 @@ class Pomodoro:
         pomodoro.save_prompt()
 
     def save_prompt(self):
+        top = tk.Toplevel(root)
+        top.geometry("430x50")
+        top.title("Save Prompt")
+
+        save_menu = tk.Frame(top)
+        save_menu.columnconfigure(0, weight=1)
+        save_menu.columnconfigure(1, weight=1)
+        save_menu.columnconfigure(2, weight=1)
+
         text = tk.Label(save_menu, text="Session Name:", font=("Ariel", 15))
         text.grid(row=0, column=0)
         entry = tk.Entry(save_menu, text="", font=("Ariel", 15))
         entry.grid(row=0, column=1)
         save = tk.Button(save_menu, text="Save", font=("Ariel", 10))
-        save.config(command=partial(pomodoro.appender, entry))
+        save.config(command=partial(pomodoro.appender, entry, top))
         save.grid(row=0, column=2)
-        #pomodoro.save_iter()
 
-    def appender(self, entry):
+        save_menu.pack()
+
+        
+
+    def appender(self, entry, top):
         seconds = self.total % 60
         minutes = int(self.total / 60) % 60
         hours = int((self.total / 60) / 60)
         saved[entry.get()] = f"{hours:02}:{minutes:02}:{seconds:02}"#can't have identical entry names
-        for widget in save_menu.winfo_children():
-            widget.destroy()
+        top.destroy()#pass the top window as an argument, and destroy it
         self.total = 0#resets total elapsed time when a new save entry is made
         pomodoro.save_iter()
 
@@ -232,7 +243,7 @@ class Pomodoro:
 
 
 #work time, rest time, start/stop state, work/rest state (work is true; first by default), total elapsed time (0 by default)
-pomodoro = Pomodoro(10, 5, False, True, 0)
+pomodoro = Pomodoro(1500, 300, False, True, 0)
 
 if __name__ == '__main__':
     root = tk.Tk()
@@ -246,17 +257,11 @@ if __name__ == '__main__':
     session.columnconfigure(0, weight=1)#general info
     session.columnconfigure(1, weight=1)#delete session
 
-    save_menu = tk.Frame(root)
-    save_menu.columnconfigure(0, weight=1)
-    save_menu.columnconfigure(1, weight=1)
-    save_menu.columnconfigure(2, weight=1)
-
     wr_display = tk.Frame(root)
     wr_display.columnconfigure(0, weight=1)
 
     settings = tk.Frame(root)
     settings.columnconfigure(0, weight=1)
-
     
     clock_thread = threading.Thread(target=pomodoro.clock)#this is a CHILD/WORKER THREAD, which can execute its target function 
                                                 #simultaneously while we do our other processes
@@ -285,8 +290,6 @@ if __name__ == '__main__':
     settings.pack()
 
     wr_display.pack()
-
-    save_menu.pack()
 
     session.pack()
 
