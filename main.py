@@ -6,8 +6,6 @@ import time
 #the MAIN THREAD is the default/initial thread of execution in any given program
 #OBJECTS & CLASSES - this is the avoidance of global declaration, with no need for mutable containers (lists, dicts, etc.)
 
-saved = {}#dictionary pairs: ("text_entry": "elapsed_time"), we can use enumerate to extract index
-
 class Pomodoro:
     def __init__(self, work, rest, state, wr_state, total):#work/rest state, work=true, rest=false
         self.work = work
@@ -16,6 +14,7 @@ class Pomodoro:
         self.wr_state = wr_state#brute forced this, created a new object which determines work/rest state
         self.total = total#total elasped time, includes work and rest times; total session time
         self.remain = work #time remaining for work/rest cycle
+        self.saved = {}#dictionary pairs: ("text_entry": "elapsed_time"), we can use enumerate to extract index
 
     def clock(self):
         seconds = self.remain % 60
@@ -153,16 +152,16 @@ class Pomodoro:
         seconds = self.total % 60
         minutes = int(self.total / 60) % 60
         hours = int((self.total / 60) / 60)
-        saved[entry.get()] = f"{hours:02}:{minutes:02}:{seconds:02}"#can't have identical entry names
+        self.saved[entry.get()] = f"{hours:02}:{minutes:02}:{seconds:02}"#can't have identical entry names
         top.destroy()#pass the top window as an argument, and destroy it
         self.total = 0#resets total elapsed time when a new save entry is made
         pomodoro.save_iter()
 
     def save_iter(self):
-        if not saved:#ensures iteration of a blank space when there are no more dict elements
+        if not self.saved:#ensures iteration of a blank space when there are no more dict elements
             space = tk.Label(session)
             space.grid(row=0)
-        for index, (key, value) in enumerate(saved.items()):
+        for index, (key, value) in enumerate(self.saved.items()):
             sesh = tk.Label(session, text=f"{key} -- Elapsed time: {value}", font=("Ariel", 15))
             sesh.grid(row=index, column=0)
             dlt = tk.Button(session, text="Delete", font=("Ariel", 10))
@@ -170,7 +169,7 @@ class Pomodoro:
             dlt.grid(row=index, column=1)
     
     def delete(self, key):
-        saved.pop(key)#poping a key pops the entire dict element; index, (key, value) pair is removed
+        self.saved.pop(key)#poping a key pops the entire dict element; index, (key, value) pair is removed
         for widget in session.winfo_children():
             widget.destroy()
         pomodoro.save_iter()
@@ -241,7 +240,10 @@ class Pomodoro:
 
 
 
-#work time, rest time, start/stop state, work/rest state (work is true; first by default), total elapsed time (0 by default)
+'''
+work time, rest time, start/stop state, work/rest state (work is true; first by default),
+total elapsed time (0 by default), saved dict empty by default (None)
+'''
 pomodoro = Pomodoro(1500, 300, False, True, 0)
 
 if __name__ == '__main__':
